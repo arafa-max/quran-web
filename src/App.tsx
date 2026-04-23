@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Surahs } from "./pages/Surahs";
 import { Juz } from "./pages/Juz";
+import { BookmarksPage } from "./pages/Bookmarks";
 import { Reciters } from "./pages/Reciters";
 import { Recents } from "./pages/Recents";
 import { Help } from "./pages/Help";
@@ -14,6 +15,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Surahs />} />
+          <Route path="/bookmarks" element={<BookmarksPage />} />
           <Route path="/juz" element={<Juz />} />
           <Route path="/reciters" element={<Reciters />} />
           <Route path="/recents" element={<Recents />} />

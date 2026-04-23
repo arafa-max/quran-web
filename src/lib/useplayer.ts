@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { getAudio } from "@/components/menu/audioDb";
 
-export type Track = { src: string; title: string };
+export type Track = { src: string; title: string; reciter?: string };
 export type RepeatMode = "none" | "one" | "all";
 
 // "https://everyayah.com/.../001001.mp3"  →  "1:1"
@@ -13,6 +13,7 @@ function srcToKey(src: string): string | null {
 
 // Возвращает blob URL из кэша или оригинальный src
 async function resolveSrc(src: string): Promise<string> {
+  if (!src.includes("/Alafasy_64kbps/")) return src;
   const key = srcToKey(src);
   if (!key) return src;
   const blob = await getAudio(key);

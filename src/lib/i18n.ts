@@ -45,6 +45,7 @@ const translations = {
     menuNames: "99 имён",
     menuPrayerTimes: "Время намазов",
     menuAbout: "Об переводе",
+    menuNoReciters: "Список чтецов пуст",
 
     // AyahList
     listSuras: "Список сур",
@@ -90,6 +91,23 @@ const translations = {
     // About
     aboutTitle: "Об переводе",
     aboutSubtitle: "Информация о переводе Корана",
+
+    // Juz
+    juzTitle: "Джузы",
+    juzSelectPrompt: "Выберите джуз",
+    juzStartsAt: "Начало",
+    juzEndsAt: "Конец",
+
+    // Bookmarks
+    bookmarksTitle: "Избранные",
+    bookmarksSubtitle: "Сохранённые аяты для быстрого доступа",
+    bookmarksEmpty: "Закладок пока нет",
+    bookmarksSelectPrompt: "Выберите аят из избранного",
+
+    // Reciters
+    recitersTitle: "Чтецы",
+    recitersSubtitle: "Выберите чтеца для воспроизведения аятов",
+    recitersCurrent: "Сейчас выбран",
   },
 
   en: {
@@ -136,6 +154,7 @@ const translations = {
     menuNames: "99 Names",
     menuPrayerTimes: "Prayer Times",
     menuAbout: "About Translation",
+    menuNoReciters: "Reciter list is empty",
 
     // AyahList
     listSuras: "Surah list",
@@ -181,6 +200,23 @@ const translations = {
     // About
     aboutTitle: "About Translation",
     aboutSubtitle: "Information about the Quran translation",
+
+    // Juz
+    juzTitle: "Juz",
+    juzSelectPrompt: "Choose a juz",
+    juzStartsAt: "Starts at",
+    juzEndsAt: "Ends at",
+
+    // Bookmarks
+    bookmarksTitle: "Bookmarks",
+    bookmarksSubtitle: "Saved ayahs for quick access",
+    bookmarksEmpty: "No bookmarks yet",
+    bookmarksSelectPrompt: "Choose an ayah from bookmarks",
+
+    // Reciters
+    recitersTitle: "Reciters",
+    recitersSubtitle: "Choose a reciter for ayah playback",
+    recitersCurrent: "Currently selected",
   },
 
   du: {
@@ -227,6 +263,7 @@ const translations = {
     menuNames: "99 исим",
     menuPrayerTimes: "Намаз вақти",
     menuAbout: "Тәржүмә һәққидә",
+    menuNoReciters: "Оқуғучи тизими бош",
 
     // AyahList
     listSuras: "Сурәләр тизими",
@@ -272,6 +309,23 @@ const translations = {
     // About
     aboutTitle: "Тәржүмә һәққидә",
     aboutSubtitle: "Қуран тәржүмиси һәққидә учур",
+
+    // Juz
+    juzTitle: "Жузлар",
+    juzSelectPrompt: "Жуз таллаң",
+    juzStartsAt: "Башлиниши",
+    juzEndsAt: "Ахири",
+
+    // Bookmarks
+    bookmarksTitle: "Сақланғанлар",
+    bookmarksSubtitle: "Тиз етишиш үчүн сақланған аятлар",
+    bookmarksEmpty: "Техи сақланған жуқ",
+    bookmarksSelectPrompt: "Сақланғанлардин аят таллаң",
+
+    // Reciters
+    recitersTitle: "Оқуғучилар",
+    recitersSubtitle: "Аят авәзини аңлаш үчүн оқуғучи таллаң",
+    recitersCurrent: "Һазир талланған",
   },
 } as const;
 

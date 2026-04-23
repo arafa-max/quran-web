@@ -7,6 +7,7 @@ import { loadSettings, saveSettings, type AppSettings } from "@/lib/settings";
 import { useProfile } from "@/lib/useProfile";
 import { getDb, queryDb } from "@/lib/db";
 import { useT } from "@/lib/i18n";
+import { getReciterById } from "@/lib/reciters";
 import { List, X } from "lucide-react";
 
 interface NameRow {
@@ -62,8 +63,6 @@ export function Names() {
   return (
     <div className="flex h-screen bg-black overflow-hidden">
       <Menu
-        bookmarks={[]}
-        onSelectBookmark={() => {}}
         settings={settings}
         profile={profile}
         onLogout={logout}
@@ -209,7 +208,7 @@ export function Names() {
         </div>
 
         <div className="shrink-0 h-16 z-30">
-          <Player player={player} />
+          <Player player={player} reciterName={getReciterById(settings.reciterId).name} />
         </div>
       </div>
 

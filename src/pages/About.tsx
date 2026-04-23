@@ -6,6 +6,7 @@ import { usePlayer } from "@/lib/useplayer";
 import { loadSettings, saveSettings, type AppSettings } from "@/lib/settings";
 import { useProfile } from "@/lib/useProfile";
 import { useT } from "@/lib/i18n";
+import { getReciterById } from "@/lib/reciters";
 
 // Путь к PDF файлу — замените на реальный путь
 const PDF_PATH = "/about-translation.pdf";
@@ -35,8 +36,6 @@ export function About() {
   return (
     <div className="flex h-screen bg-black overflow-hidden">
       <Menu
-        bookmarks={[]}
-        onSelectBookmark={() => {}}
         settings={settings}
         profile={profile}
         onLogout={logout}
@@ -81,7 +80,7 @@ export function About() {
         </div>
 
         <div className="shrink-0 h-16 z-30">
-          <Player player={player} />
+          <Player player={player} reciterName={getReciterById(settings.reciterId).name} />
         </div>
       </div>
     </div>

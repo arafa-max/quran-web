@@ -7,13 +7,13 @@ import { usePlayer } from "@/lib/useplayer";
 import { loadSettings, saveSettings, type AppSettings } from "@/lib/settings";
 import { useProfile } from "@/lib/useProfile";
 import { useRecents } from "@/lib/useRecents";
+import { useBookmarks } from "@/lib/useBookmarks";
+import { getReciterById } from "@/lib/reciters";
 import { List, Trash2, X } from "lucide-react";
-import type { Bookmark } from "./Surahs";
 
 export function Recents() {
     const [activeSura, setActiveSura] = useState<number | null>(null);
     const [activeAyah, setActiveAyah] = useState(1);
-    const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
     const [langs, setLangs] = useState({ ar: true, ru: true, du: true });
     const [settings, setSettings] = useState(loadSettings);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -23,6 +23,7 @@ export function Recents() {
     const player = usePlayer(settings.soundEnabled);
     const { profile, setName, setAvatar, logout } = useProfile();
     const { recents, clearRecents } = useRecents();
+    const { bookmarks, toggleBookmark } = useBookmarks();
 
     useEffect(() => {
         const root = document.documentElement;
@@ -34,15 +35,6 @@ export function Recents() {
         root.classList.toggle("font-smoothing-off", !settings.fontSmoothing);
     }, [settings]);
 
-    const toggleBookmark = (sura: number, ayah: number) => {
-        setBookmarks((prev) => {
-            const exists = prev.some((b) => b.sura === sura && b.ayah === ayah);
-            return exists
-                ? prev.filter((b) => !(b.sura === sura && b.ayah === ayah))
-                : [...prev, { sura, ayah }];
-        });
-    };
-
     const formatTime = (ts: number) => {
         const d = new Date(ts);
         return d.toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
@@ -51,8 +43,6 @@ export function Recents() {
     return (
         <div className="flex h-screen bg-black overflow-hidden">
             <Menu
-                bookmarks={bookmarks}
-                onSelectBookmark={(b) => { setActiveSura(b.sura); setActiveAyah(b.ayah); }}
                 settings={settings}
                 profile={profile}
                 onLogout={logout}
@@ -161,7 +151,7 @@ export function Recents() {
                 </div>
 
                 <div className="shrink-0 h-16 z-30">
-                    <Player player={player} />
+                    <Player player={player} reciterName={getReciterById(settings.reciterId).name} />
                 </div>
             </div>
 

@@ -3,7 +3,6 @@ import {
     Download, HelpCircle, LogOut,
     PanelLeftClose, PanelLeftOpen, Star, Clock4, Info, X
 } from "lucide-react";
-import type { Bookmark as BookmarkType } from "../../pages/Surahs";
 import type { AppSettings } from "@/lib/settings";
 import type { Profile } from "@/lib/useProfile";
 import { useT } from "@/lib/i18n";
@@ -16,8 +15,6 @@ import { DownloadModal } from "./DownloadModal";
 import { useNavigate, useLocation } from "react-router-dom";
 
 interface Props {
-    bookmarks: BookmarkType[];
-    onSelectBookmark: (b: BookmarkType) => void;
     settings: AppSettings;
     profile: Profile;
     onLogout: () => void;
@@ -90,7 +87,7 @@ function useModalSuras() {
 const NAV_ITEMS = [
     { icon: BookOpen, key: "SURAHS", path: "/" },
     { icon: List, key: "JUZ", path: "/juz" },
-    { icon: Bookmark, key: "BOOKMARKS", path: "/" },
+    { icon: Bookmark, key: "BOOKMARKS", path: "/bookmarks" },
     { icon: Clock, key: "RECENTS", path: "/recents" },
     { icon: Mic, key: "RECITERS", path: "/reciters" },
     { icon: Star, key: "NAMES", path: "/names" },
@@ -100,6 +97,7 @@ const NAV_ITEMS = [
 
 const PATH_TO_KEY: Record<string, string> = {
     "/": "SURAHS",
+    "/bookmarks": "BOOKMARKS",
     "/juz": "JUZ",
     "/recents": "RECENTS",
     "/reciters": "RECITERS",
@@ -114,8 +112,6 @@ interface MenuLocationState {
 }
 
 export function Menu({
-    bookmarks,
-    onSelectBookmark,
     settings,
     onLogout,
     onNavigate,
@@ -132,8 +128,8 @@ export function Menu({
     const pathname = location.pathname.toLowerCase();
     const locationState = location.state as MenuLocationState | null;
     const rootMenuKey = locationState?.menuKey;
-    const routeActive = pathname === "/"
-        ? (rootMenuKey === "BOOKMARKS" ? "BOOKMARKS" : "SURAHS")
+    const routeActive = pathname === "/" && rootMenuKey === "BOOKMARKS"
+        ? "BOOKMARKS"
         : (PATH_TO_KEY[pathname] ?? "SURAHS");
     const [active, setActive] = useState<string>(routeActive);
     const [collapsed, setCollapsed] = useState(false);
@@ -249,27 +245,6 @@ export function Menu({
                     );
                 })}
 
-                {/* Закладки */}
-                {active === "BOOKMARKS" && !collapsed && (
-                    <div className="mt-2 flex flex-col gap-0.5 max-h-44 overflow-y-auto pl-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {bookmarks.length === 0 ? (
-                            <p className="text-zinc-700 text-xs px-4 py-2">{t.menuNoBookmarks}</p>
-                        ) : (
-                            bookmarks.map((b) => (
-                                <button
-                                    key={`${b.sura}-${b.ayah}`}
-                                    onClick={() => { onSelectBookmark(b); onMobileClose?.(); }}
-                                    className="flex items-center gap-2.5 px-4 py-2 rounded-[9px] text-[13.5px] text-zinc-400 hover:bg-[#1a1a1a] hover:text-zinc-200 transition-colors text-left"
-                                >
-                                    <Bookmark size={12} className="text-yellow-500 shrink-0" fill="currentColor" />
-                                    <span className="truncate">
-                                        {t.listSura} {b.sura}, {t.listAyah} {b.ayah}
-                                    </span>
-                                </button>
-                            ))
-                        )}
-                    </div>
-                )}
             </nav>
 
             {/* Нижняя панель */}

@@ -9,14 +9,16 @@ import { loadSettings, saveSettings, type AppSettings } from "@/lib/settings";
 import { useProfile } from "@/lib/useProfile";
 import { useRecents } from "@/lib/useRecents";
 import { getDb, queryDb } from "@/lib/db";
+import { useBookmarks } from "@/lib/useBookmarks";
+import { getReciterById } from "@/lib/reciters";
 import { List, X } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 export type Bookmark = { sura: number; ayah: number };
 
 export function Surahs() {
   const [activeSura, setActiveSura] = useState(1);
   const [activeAyah, setActiveAyah] = useState(1);
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [langs, setLangs] = useState({ ar: true, ru: true, du: true });
   const [settings, setSettings] = useState(loadSettings);
   const [listOpen, setListOpen] = useState(false);
@@ -26,6 +28,8 @@ export function Surahs() {
   const player = usePlayer(settings.soundEnabled);
   const { profile, setName, setAvatar, logout } = useProfile();
   const { addRecent } = useRecents();
+  const { bookmarks, toggleBookmark } = useBookmarks();
+  const location = useLocation();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -67,22 +71,18 @@ export function Surahs() {
     });
   };
 
-  const toggleBookmark = (sura: number, ayah: number) => {
-    setBookmarks((prev) => {
-      const exists = prev.some((b) => b.sura === sura && b.ayah === ayah);
-      return exists
-        ? prev.filter((b) => !(b.sura === sura && b.ayah === ayah))
-        : [...prev, { sura, ayah }];
-    });
-  };
+  useEffect(() => {
+    const state = location.state as { bookmark?: Bookmark } | null;
+    if (!state?.bookmark) return;
+    setActiveSura(state.bookmark.sura);
+    setActiveAyah(state.bookmark.ayah);
+  }, [location.state]);
 
   return (
     <div className="flex h-screen bg-black overflow-hidden">
 
       {/* Menu — десктоп sidebar + мобильный drawer (через пропы) */}
       <Menu
-        bookmarks={bookmarks}
-        onSelectBookmark={(b) => { handleSelectSura(b.sura); setActiveAyah(b.ayah); }}
         settings={settings}
         profile={profile}
         onLogout={logout}
@@ -152,7 +152,7 @@ export function Surahs() {
           </div>
 
           <div className="shrink-0 h-16 z-30">
-            <Player player={player} />
+            <Player player={player} reciterName={getReciterById(settings.reciterId).name} />
           </div>
         </div>
       </div>

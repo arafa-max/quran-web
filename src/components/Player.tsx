@@ -7,9 +7,10 @@ import type { usePlayer } from "@/lib/useplayer";
 
 interface Props {
   player: ReturnType<typeof usePlayer>;
+  reciterName?: string;
 }
 
-export function Player({ player }: Props) {
+export function Player({ player, reciterName }: Props) {
   const {
     audioRef, track, queue, index, playing, progress,
     currentTime, duration, volume, repeat, shuffle,
@@ -68,7 +69,7 @@ export function Player({ player }: Props) {
             <p className="text-white text-xs font-semibold truncate max-w-[100px]">
               {track?.title ?? "—"}
             </p>
-            <p className="text-zinc-500 text-xs">MISHARY RASHID ALAFASY</p>
+            <p className="text-zinc-500 text-xs">{track?.reciter ?? reciterName ?? "—"}</p>
           </div>
         </div>
 

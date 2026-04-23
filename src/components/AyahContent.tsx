@@ -6,6 +6,7 @@ import type { Bookmark as BookmarkType } from "../pages/Surahs";
 import type { AppSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { getAudio } from "@/components/menu/audioDb";
+import { getReciterById } from "@/lib/reciters";
 
 interface Ayah {
   number: number;
@@ -31,18 +32,22 @@ interface Props {
   settings: AppSettings;
 }
 
-const REMOTE_AUDIO_URL = (sura: number, ayah: number) =>
-  `https://everyayah.com/data/Alafasy_64kbps/${String(sura).padStart(3, "0")}${String(ayah).padStart(3, "0")}.mp3`;
+const REMOTE_AUDIO_URL = (sura: number, ayah: number, reciterId: string) =>
+  `https://everyayah.com/data/${getReciterById(reciterId).folder}/${String(sura).padStart(3, "0")}${String(ayah).padStart(3, "0")}.mp3`;
 
-async function resolveAudioUrl(sura: number, ayah: number): Promise<string> {
+async function resolveAudioUrl(sura: number, ayah: number, reciterId: string): Promise<string> {
+  if (reciterId !== "alafasy") {
+    return REMOTE_AUDIO_URL(sura, ayah, reciterId);
+  }
   const key = `${sura}:${ayah}`;
   const blob = await getAudio(key);
   if (blob) return URL.createObjectURL(blob);
-  return REMOTE_AUDIO_URL(sura, ayah);
+  return REMOTE_AUDIO_URL(sura, ayah, reciterId);
 }
 
 export function AyahContent({ sura, activeAyah, player, bookmarks, onToggleBookmark, langs, settings }: Props) {
   const t = useT(settings.interfaceLang);
+  const reciter = getReciterById(settings.reciterId);
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
   const [suraInfo, setSuraInfo] = useState<SuraInfo | null>(null);
   const ayahRefs = useRef<Record<number, HTMLDivElement | null>>({});
@@ -76,15 +81,15 @@ export function AyahContent({ sura, activeAyah, player, bookmarks, onToggleBookm
     async (ayah: Ayah) => {
       const tracks = await Promise.all(
         ayahs.map(async (a) => {
-          const src = await resolveAudioUrl(sura, a.number);
+          const src = await resolveAudioUrl(sura, a.number, settings.reciterId);
           if (src.startsWith("blob:")) blobUrls.current.push(src);
-          return { src, title: `${t.listAyah} ${a.number}` };
+          return { src, title: `${t.listAyah} ${a.number}`, reciter: reciter.name };
         }),
       );
       const idx = ayahs.findIndex((a) => a.number === ayah.number);
       player.playAll(tracks, idx);
     },
-    [ayahs, sura, t, player],
+    [ayahs, sura, t, player, settings.reciterId, reciter.name],
   );
 
   return (
@@ -106,7 +111,7 @@ export function AyahContent({ sura, activeAyah, player, bookmarks, onToggleBookm
 
       {/* Аяты */}
       {ayahs.map((ayah) => {
-        const remoteUrl = REMOTE_AUDIO_URL(sura, ayah.number);
+        const remoteUrl = REMOTE_AUDIO_URL(sura, ayah.number, settings.reciterId);
         const isThisPlaying =
           player.playing &&
           (player.track?.src === remoteUrl ||

@@ -5,6 +5,7 @@ export interface AppSettings {
   compactMode: boolean;
   soundEnabled: boolean;
   fontSmoothing: boolean;
+  reciterId: string;
 }
 
 export const defaultSettings: AppSettings = {
@@ -14,6 +15,7 @@ export const defaultSettings: AppSettings = {
   compactMode: false,
   soundEnabled: true,
   fontSmoothing: true,
+  reciterId: "alafasy",
 };
 
 const KEY = "quran_settings";

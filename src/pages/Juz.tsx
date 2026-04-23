@@ -7,8 +7,10 @@ import { usePlayer } from "@/lib/useplayer";
 import { loadSettings, saveSettings, type AppSettings } from "@/lib/settings";
 import { useProfile } from "@/lib/useProfile";
 import { getDb, queryDb } from "@/lib/db";
+import { useT } from "@/lib/i18n";
+import { useBookmarks } from "@/lib/useBookmarks";
+import { getReciterById } from "@/lib/reciters";
 import { List, X } from "lucide-react";
-import type { Bookmark } from "./Surahs";
 
 interface JuzRow {
     juz: number;
@@ -22,20 +24,40 @@ interface SuraName {
     name_translate: string;
 }
 
+interface JuzDisplayRow extends JuzRow {
+    name_ru: string;
+    name_translate: string;
+    endSura: number;
+    endAyah: number;
+}
+
+function getPrevAyahPosition(sura: number, ayah: number, ayahCounts: Record<number, number>) {
+    if (ayah > 1) return { sura, ayah: ayah - 1 };
+
+    const prevSura = sura - 1;
+    if (prevSura < 1) return { sura, ayah };
+
+    return {
+        sura: prevSura,
+        ayah: ayahCounts[prevSura] ?? 1,
+    };
+}
+
 export function Juz() {
     const [activeSura, setActiveSura] = useState(1);
     const [activeAyah, setActiveAyah] = useState(1);
-    const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
     const [langs, setLangs] = useState({ ar: true, ru: true, du: true });
     const [settings, setSettings] = useState(loadSettings);
     const [menuOpen, setMenuOpen] = useState(false);
     const [listOpen, setListOpen] = useState(true);
-    const [juzList, setJuzList] = useState<(JuzRow & { name_ru: string; name_translate: string })[]>([]);
+    const [juzList, setJuzList] = useState<JuzDisplayRow[]>([]);
     const [view, setView] = useState<"juz" | "content">("juz");
 
     const handleChangeSettings = (s: AppSettings) => { setSettings(s); saveSettings(s); };
     const player = usePlayer(settings.soundEnabled);
     const { profile, setName, setAvatar, logout } = useProfile();
+    const t = useT(settings.interfaceLang);
+    const { bookmarks, toggleBookmark } = useBookmarks();
 
     useEffect(() => {
         const root = document.documentElement;
@@ -52,11 +74,27 @@ export function Juz() {
             const juzRows = queryDb<JuzRow>(db, "SELECT * FROM juz ORDER BY juz");
             const suraNames = queryDb<SuraName>(db, "SELECT number, name_ru, name_translate FROM suras_names");
             const nameMap = Object.fromEntries(suraNames.map((s) => [s.number, s]));
-            setJuzList(juzRows.map((j) => ({
-                ...j,
-                name_ru: nameMap[j.sura]?.name_ru ?? "",
-                name_translate: nameMap[j.sura]?.name_translate ?? "",
-            })));
+            const ayahCounts: Record<number, number> = {};
+
+            suraNames.forEach((s) => {
+                const count = queryDb<{ cnt: number }>(db, `SELECT COUNT(*) as cnt FROM sura_${s.number}`);
+                ayahCounts[s.number] = count[0]?.cnt ?? 0;
+            });
+
+            setJuzList(juzRows.map((j, index) => {
+                const next = juzRows[index + 1];
+                const end = next
+                    ? getPrevAyahPosition(next.sura, next.ayah, ayahCounts)
+                    : { sura: 114, ayah: ayahCounts[114] ?? 6 };
+
+                return {
+                    ...j,
+                    name_ru: nameMap[j.sura]?.name_ru ?? "",
+                    name_translate: nameMap[j.sura]?.name_translate ?? "",
+                    endSura: end.sura,
+                    endAyah: end.ayah,
+                };
+            }));
         });
     }, []);
 
@@ -67,20 +105,9 @@ export function Juz() {
         setListOpen(false);
     };
 
-    const toggleBookmark = (sura: number, ayah: number) => {
-        setBookmarks((prev) => {
-            const exists = prev.some((b) => b.sura === sura && b.ayah === ayah);
-            return exists
-                ? prev.filter((b) => !(b.sura === sura && b.ayah === ayah))
-                : [...prev, { sura, ayah }];
-        });
-    };
-
     return (
         <div className="flex h-screen bg-black overflow-hidden">
             <Menu
-                bookmarks={bookmarks}
-                onSelectBookmark={(b) => { setActiveSura(b.sura); setActiveAyah(b.ayah); setView("content"); }}
                 settings={settings}
                 profile={profile}
                 onLogout={logout}
@@ -128,25 +155,31 @@ export function Juz() {
 
                         <div className="shrink-0 w-full h-full flex flex-col bg-black border-r border-[#262626]/50 overflow-hidden">
                         <div className="shrink-0 px-4 py-3 border-b border-[#262626]/50">
-                            <p className="text-[#F59E0B] text-xs uppercase">Джузы</p>
+                            <p className="text-[#F59E0B] text-xs uppercase">{t.juzTitle}</p>
                         </div>
                         <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                             {juzList.map((j) => (
                                 <button
                                     key={j.juz}
                                     onClick={() => handleSelectJuz(j)}
-                                    className={`w-full flex items-center justify-between px-4 py-3 h-[80px]
+                                    className={`w-full flex items-start justify-between px-4 py-3 min-h-[96px]
                               rounded-[8px] transition-colors
                               ${view === "content" && activeSura === j.sura && activeAyah === j.ayah
                                             ? "bg-yellow-500/10 text-yellow-500 border border-[#F59E0B33]"
                                             : "text-zinc-400 hover:bg-zinc-800"
                                         }`}
                                 >
-                                    <div className="flex flex-col items-start gap-1">
-                                        <span className="text-xs text-zinc-500">Джуз {j.juz}</span>
+                                    <div className="flex flex-col items-start gap-1.5 text-left">
+                                        <span className="text-xs text-zinc-500">{t.menuJuz} {j.juz}</span>
                                         <span className="text-sm">{j.name_ru}</span>
+                                        <span className="text-[11px] leading-relaxed text-zinc-500">
+                                            {t.juzStartsAt}: {t.listSura} {j.sura}, {t.listAyah} {j.ayah}
+                                        </span>
+                                        <span className="text-[11px] leading-relaxed text-zinc-600">
+                                            {t.juzEndsAt}: {t.listSura} {j.endSura}, {t.listAyah} {j.endAyah}
+                                        </span>
                                     </div>
-                                    <span className="text-sm font-arabic">{j.name_translate}</span>
+                                    <span className="text-sm font-arabic pt-0.5">{j.name_translate}</span>
                                 </button>
                             ))}
                         </div>
@@ -167,14 +200,14 @@ export function Juz() {
                             />
                         ) : (
                             <div className="flex items-center justify-center h-full">
-                                <p className="text-zinc-600 text-sm">Выберите джуз</p>
+                                <p className="text-zinc-600 text-sm">{t.juzSelectPrompt}</p>
                             </div>
                         )}
                     </div>
                 </div>
 
                 <div className="shrink-0 h-16 z-30">
-                    <Player player={player} />
+                    <Player player={player} reciterName={getReciterById(settings.reciterId).name} />
                 </div>
             </div>
 
