@@ -22,7 +22,8 @@ export function Surahs() {
   const [langs, setLangs] = useState({ ar: true, ru: true, du: true });
   const [settings, setSettings] = useState(loadSettings);
   const [menuCollapsed, setMenuCollapsed] = useState(false);
-  const [listOpen, setListOpen] = useState(false); // мобильный drawer
+  const [listOpen, setListOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false); // мобильный drawer меню
 
   const handleChangeSettings = (s: AppSettings) => { setSettings(s); saveSettings(s); };
   const player = usePlayer(settings.soundEnabled);
@@ -59,18 +60,17 @@ export function Surahs() {
     });
   };
 
+  const handleSelectSuraMobile = (n: number) => {
+    handleSelectSura(n);
+  };
 
- const handleSelectSuraMobile = (n: number) => {
-  handleSelectSura(n);
-  // НЕ закрываем — ждём выбора аята
-};
-const handleSelectAyah = (ayah: number) => {
-  setActiveAyah(ayah);
-  setListOpen(false); // закрываем только после выбора аята
-  getSuraInfo(activeSura).then((info) => {
-    if (info) addRecent({ sura: activeSura, ayah, name_ru: info.name_ru, name_translate: info.name_translate });
-  });
-};
+  const handleSelectAyah = (ayah: number) => {
+    setActiveAyah(ayah);
+    setListOpen(false);
+    getSuraInfo(activeSura).then((info) => {
+      if (info) addRecent({ sura: activeSura, ayah, name_ru: info.name_ru, name_translate: info.name_translate });
+    });
+  };
 
   const toggleBookmark = (sura: number, ayah: number) => {
     setBookmarks((prev) => {
@@ -83,24 +83,21 @@ const handleSelectAyah = (ayah: number) => {
 
   return (
     <div className="flex h-screen bg-black overflow-hidden">
-      {/* Menu — на мобильном скрыт */}
-      <div className="hidden md:block">
-        <Menu
-          bookmarks={bookmarks}
-          onSelectBookmark={(b) => { handleSelectSura(b.sura); setActiveAyah(b.ayah); }}
-          settings={settings}
-          profile={profile}
-          onLogout={logout}
-          onNavigate={handleSelectSura}
-          onCollapse={setMenuCollapsed}
-        />
-      </div>
 
-      <div
-        style={{ marginLeft: 0 }}
-        className="flex flex-col flex-1 h-screen md:transition-all md:duration-300 md:ease-in-out overflow-hidden"
-      >
-        {/* На десктопе отступ от меню */}
+      {/* Menu — десктоп sidebar + мобильный drawer (через пропы) */}
+      <Menu
+        bookmarks={bookmarks}
+        onSelectBookmark={(b) => { handleSelectSura(b.sura); setActiveAyah(b.ayah); }}
+        settings={settings}
+        profile={profile}
+        onLogout={logout}
+        onNavigate={handleSelectSura}
+        onCollapse={setMenuCollapsed}
+        mobileOpen={menuOpen}
+        onMobileClose={() => setMenuOpen(false)}
+      />
+
+      <div className="flex flex-col flex-1 h-screen md:transition-all md:duration-300 md:ease-in-out overflow-hidden">
         <style>{`@media (min-width: 768px) { .desktop-margin { margin-left: ${menuW}px; } }`}</style>
 
         <div className="desktop-margin flex flex-col flex-1 h-screen overflow-hidden">
@@ -115,13 +112,12 @@ const handleSelectAyah = (ayah: number) => {
               profile={profile}
               onSetName={setName}
               onSetAvatar={setAvatar}
+              onOpenMenu={() => setMenuOpen(true)}
             />
           </div>
 
           <div className="flex flex-1 overflow-hidden relative">
 
-            {/* AyahList — десктоп: сбоку, мобильный: drawer */}
-            {/* Мобильный overlay */}
             {listOpen && (
               <div
                 className="fixed inset-0 z-40 bg-black/60 md:hidden"
@@ -129,14 +125,12 @@ const handleSelectAyah = (ayah: number) => {
               />
             )}
 
-            {/* Drawer / sidebar */}
             <div className={`
               fixed inset-y-0 left-0 z-50 w-full h-full transition-transform duration-300
               md:relative md:inset-auto md:z-auto md:w-64 md:shrink-0 md:translate-x-0
               md:border-r md:border-[#262626]/50
               ${listOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
             `}>
-              {/* Кнопка закрыть на мобильном */}
               <button
                 className="absolute top-3 right-3 z-10 md:hidden text-zinc-500 hover:text-white"
                 onClick={() => setListOpen(false)}
@@ -171,7 +165,6 @@ const handleSelectAyah = (ayah: number) => {
         </div>
       </div>
 
-      {/* Кнопка открыть список — только мобильный */}
       <button
         className="fixed bottom-20 right-4 z-40 md:hidden w-12 h-12 rounded-full bg-[#F59E0B] text-black flex items-center justify-center shadow-lg"
         onClick={() => setListOpen(true)}

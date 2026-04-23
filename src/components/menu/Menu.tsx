@@ -1,14 +1,14 @@
 import {
     BookOpen, List, Bookmark, Clock, Mic,
     Download, HelpCircle, LogOut,
-    PanelLeftClose, PanelLeftOpen, Star, Clock4, Info
+    PanelLeftClose, PanelLeftOpen, Star, Clock4, Info, X
 } from "lucide-react";
 import type { Bookmark as BookmarkType } from "../../pages/Surahs";
 import type { AppSettings } from "@/lib/settings";
 import type { Profile } from "@/lib/useProfile";
 import { useT } from "@/lib/i18n";
 import { getDb, queryDb } from "@/lib/db";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDownload } from "./useDownload";
 import type { Sura } from "./useDownload";
 import { DownloadProgress } from "./DownloadProgress";
@@ -23,6 +23,9 @@ interface Props {
     onLogout: () => void;
     onNavigate?: (suraNumber: number) => void;
     onCollapse?: (collapsed: boolean) => void;
+    /** Управление мобильным drawer-ом */
+    mobileOpen?: boolean;
+    onMobileClose?: () => void;
 }
 
 function NavTooltip({ label }: { label: string }) {
@@ -94,7 +97,16 @@ const NAV_ITEMS = [
     { icon: Info, key: "ABOUT", path: "/about" },
 ] as const;
 
-export function Menu({ bookmarks, onSelectBookmark, settings, onLogout, onNavigate, onCollapse }: Props) {
+export function Menu({
+    bookmarks,
+    onSelectBookmark,
+    settings,
+    onLogout,
+    onNavigate,
+    onCollapse,
+    mobileOpen = false,
+    onMobileClose,
+}: Props) {
     const t = useT(settings.interfaceLang);
     const location = useLocation();
     const navigation = useNavigate();
@@ -104,6 +116,23 @@ export function Menu({ bookmarks, onSelectBookmark, settings, onLogout, onNaviga
     const initialKey = NAV_ITEMS.find((i) => i.path === location.pathname)?.key ?? "SURAHS";
     const [active, setActive] = useState<string>(initialKey);
     const [collapsed, setCollapsed] = useState(false);
+
+    // Закрывать мобильный drawer при навигации
+    const handleNav = useCallback((key: string, path: string) => {
+        setActive(key);
+        navigation(path);
+        onMobileClose?.();
+    }, [navigation, onMobileClose]);
+
+    // Блокировать scroll body когда drawer открыт на мобиле
+    useEffect(() => {
+        if (mobileOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => { document.body.style.overflow = ""; };
+    }, [mobileOpen]);
 
     const handleLogout = useCallback(() => {
         if (window.confirm(t.menuLogoutConfirm ?? "Выйти из профиля?")) onLogout();
@@ -120,153 +149,163 @@ export function Menu({ bookmarks, onSelectBookmark, settings, onLogout, onNaviga
         ABOUT: "Об переводе",
     };
 
-    return (
-        <>
-            <div
-                style={{ width: collapsed ? 76 : 255 }}
-                className="transition-all duration-300 ease-in-out h-screen
-                           bg-[#0a0a0a] border-r border-[#1f1f1f] flex flex-col
-                           fixed left-0 top-0 z-40
-                           shrink-0"
-            >
-                {/* Логотип */}
-                <div className="px-4 pt-6 pb-5 shrink-0">
-                    <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
-                        <div className="shrink-0 w-9 h-9 rounded-xl bg-yellow-500/10
-                                        border border-yellow-500/20 flex items-center justify-center">
-                            <span className="text-yellow-400 text-sm">☽</span>
+    const sidebar = (
+        <div
+            style={{ width: collapsed ? 76 : 255 }}
+            className="transition-all duration-300 ease-in-out h-full
+                       bg-[#0a0a0a] border-r border-[#1f1f1f] flex flex-col"
+        >
+            {/* Логотип + кнопка закрытия на мобиле */}
+            <div className="px-4 pt-6 pb-5 shrink-0">
+                <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
+                    <div className="shrink-0 w-9 h-9 rounded-xl bg-yellow-500/10
+                                    border border-yellow-500/20 flex items-center justify-center">
+                        <span className="text-yellow-400 text-sm">☽</span>
+                    </div>
+                    {!collapsed && (
+                        <div className="overflow-hidden flex-1">
+                            <p className="text-yellow-400 text-[19px] font-bold uppercase
+                                          tracking-wider leading-tight whitespace-nowrap">
+                                Ихляс - Шынже <br />жин
+                            </p>
+                            <p className="text-zinc-600 text-[10.5px] uppercase tracking-widest
+                                          mt-0.5 whitespace-nowrap">
+                                Священный коран с<br /> переводом
+                            </p>
                         </div>
-                        {!collapsed && (
-                            <div className="overflow-hidden">
-                                <p className="text-yellow-400 text-[19px] font-bold uppercase
-                                              tracking-wider leading-tight whitespace-nowrap">
-                                    Ихляс - Шынже <br />жин
-                                </p>
-                                <p className="text-zinc-600 text-[10.5px] uppercase tracking-widest
-                                              mt-0.5 whitespace-nowrap">
-                                    Священный коран с<br /> переводом
-                                </p>
-                            </div>
+                    )}
+                    {/* Кнопка закрытия — только в мобильном drawer */}
+                    {!collapsed && onMobileClose && (
+                        <button
+                            onClick={onMobileClose}
+                            className="md:hidden ml-auto p-1.5 rounded-lg text-zinc-500
+                                       hover:text-zinc-300 hover:bg-zinc-800 transition-colors shrink-0"
+                            aria-label="Закрыть меню"
+                        >
+                            <X size={16} />
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            <div className="mx-4 h-px bg-[#1f1f1f] shrink-0" />
+
+            <nav className="flex flex-col gap-0.5 px-2.5 mt-3 flex-1 min-h-0
+                            overflow-y-auto overflow-x-visible
+                            [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {NAV_ITEMS.map(({ icon: Icon, key, path }) => {
+                    const isActive = active === key;
+                    const label = labelOf[key];
+
+                    return (
+                        <div key={key} className="relative group">
+                            <button
+                                onClick={() => handleNav(key, path)}
+                                className={`relative flex items-center w-full gap-3
+                                            px-4 py-[13px] rounded-[10px] text-[14.5px] font-semibold
+                                            transition-all duration-200
+                                            ${collapsed ? "justify-center" : ""}
+                                            ${isActive
+                                        ? "bg-[#3a2f00] text-yellow-400"
+                                        : "text-zinc-400 hover:bg-[#1a1a1a] hover:text-zinc-200"
+                                    }`}
+                            >
+                                {isActive && (
+                                    <span className="absolute right-0 top-1/2 -translate-y-1/2
+                                                     w-[3.5px] h-[58%] bg-yellow-400 rounded-l-full" />
+                                )}
+                                <Icon
+                                    size={18}
+                                    strokeWidth={isActive ? 2.8 : 2}
+                                    className={`shrink-0 ${isActive ? "text-yellow-400" : "text-zinc-400"}`}
+                                />
+                                {!collapsed && (
+                                    <span className={`truncate ${isActive ? "text-yellow-400" : ""}`}>
+                                        {label}
+                                    </span>
+                                )}
+                            </button>
+                            {collapsed && <NavTooltip label={label} />}
+                        </div>
+                    );
+                })}
+
+                {active === "BOOKMARKS" && !collapsed && (
+                    <div className="mt-2 flex flex-col gap-0.5 max-h-44
+                                    overflow-y-auto pl-1
+                                    [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                        {bookmarks.length === 0 ? (
+                            <p className="text-zinc-700 text-xs px-4 py-2">{t.menuNoBookmarks}</p>
+                        ) : (
+                            bookmarks.map((b) => (
+                                <button
+                                    key={`${b.sura}-${b.ayah}`}
+                                    onClick={() => { onSelectBookmark(b); onMobileClose?.(); }}
+                                    className="flex items-center gap-2.5 px-4 py-2 rounded-[9px]
+                                               text-[13.5px] text-zinc-400 hover:bg-[#1a1a1a]
+                                               hover:text-zinc-200 transition-colors text-left"
+                                >
+                                    <Bookmark size={12} className="text-yellow-500 shrink-0" fill="currentColor" />
+                                    <span className="truncate">
+                                        {t.listSura} {b.sura}, {t.listAyah} {b.ayah}
+                                    </span>
+                                </button>
+                            ))
                         )}
                     </div>
-                </div>
+                )}
+            </nav>
 
-                <div className="mx-4 h-px bg-[#1f1f1f] shrink-0" />
+            {/* Нижняя часть */}
+            <div className="px-3 pb-5 flex flex-col gap-1 mt-auto shrink-0">
+                <div className="mx-1 h-px bg-[#1f1f1f] mb-3" />
 
-                <nav className="flex flex-col gap-0.5 px-2.5 mt-3 flex-1 min-h-0
-                                overflow-y-auto overflow-x-visible
-                                [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                    {NAV_ITEMS.map(({ icon: Icon, key, path }) => {
-                        const isActive = active === key;
-                        const label = labelOf[key];
+                {!dl.downloading && (
+                    <div className="px-2 mb-2">
+                        <button
+                            onClick={openModal}
+                            className={`flex items-center gap-3 w-full px-4 py-[13px] rounded-[10px]
+                                        text-[14.5px] font-semibold transition-all duration-200
+                                        bg-[#3a2f00] hover:bg-[#4a3f10] text-yellow-400 border border-yellow-500/20
+                                        ${collapsed ? "justify-center" : ""}`}
+                        >
+                            <Download size={18} className="shrink-0" />
+                            {!collapsed && <span>{t.menuDownload}</span>}
+                        </button>
+                    </div>
+                )}
 
-                        return (
-                            <div key={key} className="relative group">
-                                <button
-                                    onClick={() => { setActive(key); navigation(path); }}
-                                    className={`relative flex items-center w-full gap-3
-                                                px-4 py-[13px] rounded-[10px] text-[14.5px] font-semibold
-                                                transition-all duration-200
-                                                ${collapsed ? "justify-center" : ""}
-                                                ${isActive
-                                            ? "bg-[#3a2f00] text-yellow-400"
-                                            : "text-zinc-400 hover:bg-[#1a1a1a] hover:text-zinc-200"
-                                        }`}
-                                >
-                                    {isActive && (
-                                        <span className="absolute right-0 top-1/2 -translate-y-1/2
-                                                         w-[3.5px] h-[58%] bg-yellow-400 rounded-l-full" />
-                                    )}
-                                    <Icon
-                                        size={18}
-                                        strokeWidth={isActive ? 2.8 : 2}
-                                        className={`shrink-0 ${isActive ? "text-yellow-400" : "text-zinc-400"}`}
-                                    />
-                                    {!collapsed && (
-                                        <span className={`truncate ${isActive ? "text-yellow-400" : ""}`}>
-                                            {label}
-                                        </span>
-                                    )}
-                                </button>
-                                {collapsed && <NavTooltip label={label} />}
-                            </div>
-                        );
-                    })}
-
-                    {active === "BOOKMARKS" && !collapsed && (
-                        <div className="mt-2 flex flex-col gap-0.5 max-h-44
-                                        overflow-y-auto pl-1
-                                        [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                            {bookmarks.length === 0 ? (
-                                <p className="text-zinc-700 text-xs px-4 py-2">{t.menuNoBookmarks}</p>
-                            ) : (
-                                bookmarks.map((b) => (
-                                    <button
-                                        key={`${b.sura}-${b.ayah}`}
-                                        onClick={() => onSelectBookmark(b)}
-                                        className="flex items-center gap-2.5 px-4 py-2 rounded-[9px]
-                                                   text-[13.5px] text-zinc-400 hover:bg-[#1a1a1a]
-                                                   hover:text-zinc-200 transition-colors text-left"
-                                    >
-                                        <Bookmark size={12} className="text-yellow-500 shrink-0" fill="currentColor" />
-                                        <span className="truncate">
-                                            {t.listSura} {b.sura}, {t.listAyah} {b.ayah}
-                                        </span>
-                                    </button>
-                                ))
-                            )}
-                        </div>
-                    )}
-                </nav>
-
-                {/* Нижняя часть */}
-                <div className="px-3 pb-5 flex flex-col gap-1 mt-auto shrink-0">
-                    <div className="mx-1 h-px bg-[#1f1f1f] mb-3" />
-
-                    {!dl.downloading && (
-                        <div className="px-2 mb-2">
-                            <button
-                                onClick={openModal}
-                                className={`flex items-center gap-3 w-full px-4 py-[13px] rounded-[10px]
-                                            text-[14.5px] font-semibold transition-all duration-200
-                                            bg-[#3a2f00] hover:bg-[#4a3f10] text-yellow-400 border border-yellow-500/20
-                                            ${collapsed ? "justify-center" : ""}`}
-                            >
-                                <Download size={18} className="shrink-0" />
-                                {!collapsed && <span>{t.menuDownload}</span>}
-                            </button>
-                        </div>
-                    )}
-
-                    {dl.downloading && !collapsed && (
-                        <DownloadProgress
-                            progress={dl.progress}
-                            pct={dl.pct}
-                            paused={dl.paused}
-                            onPause={dl.pause}
-                            onResume={dl.resume}
-                            onCancel={dl.cancel}
-                        />
-                    )}
-
-                    <BottomBtn
-                        collapsed={collapsed}
-                        icon={<HelpCircle size={17} className="shrink-0" />}
-                        label={t.menuHelp}
-                        onClick={() => { setActive("HELP"); navigation("/help"); }}
-                        className="text-zinc-500 hover:text-zinc-200 hover:bg-[#1a1a1a]"
+                {dl.downloading && !collapsed && (
+                    <DownloadProgress
+                        progress={dl.progress}
+                        pct={dl.pct}
+                        paused={dl.paused}
+                        onPause={dl.pause}
+                        onResume={dl.resume}
+                        onCancel={dl.cancel}
                     />
+                )}
 
-                    <BottomBtn
-                        collapsed={collapsed}
-                        icon={<LogOut size={17} className="shrink-0" />}
-                        label={t.menuLogout}
-                        onClick={handleLogout}
-                        className="text-zinc-500 hover:text-red-400 hover:bg-red-500/10"
-                    />
+                <BottomBtn
+                    collapsed={collapsed}
+                    icon={<HelpCircle size={17} className="shrink-0" />}
+                    label={t.menuHelp}
+                    onClick={() => handleNav("HELP", "/help")}
+                    className="text-zinc-500 hover:text-zinc-200 hover:bg-[#1a1a1a]"
+                />
 
-                    <div className="mx-1 h-px bg-[#1f1f1f] my-2" />
+                <BottomBtn
+                    collapsed={collapsed}
+                    icon={<LogOut size={17} className="shrink-0" />}
+                    label={t.menuLogout}
+                    onClick={handleLogout}
+                    className="text-zinc-500 hover:text-red-400 hover:bg-red-500/10"
+                />
 
+                <div className="mx-1 h-px bg-[#1f1f1f] my-2" />
+
+                {/* Кнопка collapse — только на десктопе */}
+                <div className="hidden md:block">
                     <BottomBtn
                         collapsed={collapsed}
                         icon={collapsed
@@ -283,6 +322,31 @@ export function Menu({ bookmarks, onSelectBookmark, settings, onLogout, onNaviga
                         className="text-zinc-600 hover:text-zinc-400 hover:bg-[#141414] font-normal"
                     />
                 </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <>
+            {/* ───── ДЕСКТОП: обычный fixed sidebar ───── */}
+            <div className="hidden md:block fixed left-0 top-0 h-screen z-40 shrink-0">
+                {sidebar}
+            </div>
+
+            {/* ───── МОБИЛЬ: drawer поверх экрана ───── */}
+            {/* Оверлей */}
+            <div
+                className={`md:hidden fixed inset-0 z-50 transition-opacity duration-300
+                            ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+                style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(2px)" }}
+                onClick={onMobileClose}
+            />
+            {/* Сам drawer */}
+            <div
+                className={`md:hidden fixed left-0 top-0 h-full z-50 transition-transform duration-300 ease-in-out
+                            ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+            >
+                {sidebar}
             </div>
 
             {showModal && (
