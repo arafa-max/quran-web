@@ -131,7 +131,7 @@ const handleSelectAyah = (ayah: number) => {
 
             {/* Drawer / sidebar */}
             <div className={`
-              fixed inset-y-0 left-0 z-50 w-72 h-full transition-transform duration-300
+              fixed inset-y-0 left-0 z-50 w-full h-full transition-transform duration-300
               md:relative md:inset-auto md:z-auto md:w-64 md:shrink-0 md:translate-x-0
               md:border-r md:border-[#262626]/50
               ${listOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
