@@ -30,7 +30,7 @@ interface Props {
   profile: Profile;
   onSetName: (name: string) => void;
   onSetAvatar: (avatar: string | null) => void;
-  onOpenMenu: () => void;
+  onOpenMenu?: () => void; // необязательный
 }
 
 export function Navbar({
@@ -61,7 +61,6 @@ export function Navbar({
     });
   }, []);
 
-  // Закрыть дропдаун при клике снаружи
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node))
@@ -96,14 +95,16 @@ export function Navbar({
   return (
     <div className="h-16 w-full bg-[#171717CC] backdrop-blur-[12px] border-b border-[#262626]/50 flex items-center px-4 gap-3 z-30">
 
-      {/* Гамбургер — только мобиль, открывает Menu через проп */}
-      <button
-        className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
-        onClick={onOpenMenu}
-        aria-label="Открыть меню"
-      >
-        <Menu size={18} />
-      </button>
+      {/* Гамбургер — только мобиль, только если передан onOpenMenu */}
+      {onOpenMenu && (
+        <button
+          className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+          onClick={onOpenMenu}
+          aria-label="Открыть меню"
+        >
+          <Menu size={18} />
+        </button>
+      )}
 
       {/* Поиск */}
       <div ref={ref} className="relative flex-1 max-w-sm">
