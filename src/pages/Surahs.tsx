@@ -9,6 +9,7 @@ import { loadSettings, saveSettings, type AppSettings } from "@/lib/settings";
 import { useProfile } from "@/lib/useProfile";
 import { useRecents } from "@/lib/useRecents";
 import { getDb, queryDb } from "@/lib/db";
+import { List, X } from "lucide-react";
 
 export type Bookmark = { sura: number; ayah: number };
 
@@ -21,6 +22,7 @@ export function Surahs() {
   const [langs, setLangs] = useState({ ar: true, ru: true, du: true });
   const [settings, setSettings] = useState(loadSettings);
   const [menuCollapsed, setMenuCollapsed] = useState(false);
+  const [listOpen, setListOpen] = useState(false); // мобильный drawer
 
   const handleChangeSettings = (s: AppSettings) => { setSettings(s); saveSettings(s); };
   const player = usePlayer(settings.soundEnabled);
@@ -57,12 +59,18 @@ export function Surahs() {
     });
   };
 
-  const handleSelectAyah = (ayah: number) => {
-    setActiveAyah(ayah);
-    getSuraInfo(activeSura).then((info) => {
-      if (info) addRecent({ sura: activeSura, ayah, name_ru: info.name_ru, name_translate: info.name_translate });
-    });
-  };
+
+ const handleSelectSuraMobile = (n: number) => {
+  handleSelectSura(n);
+  // НЕ закрываем — ждём выбора аята
+};
+const handleSelectAyah = (ayah: number) => {
+  setActiveAyah(ayah);
+  setListOpen(false); // закрываем только после выбора аята
+  getSuraInfo(activeSura).then((info) => {
+    if (info) addRecent({ sura: activeSura, ayah, name_ru: info.name_ru, name_translate: info.name_translate });
+  });
+};
 
   const toggleBookmark = (sura: number, ayah: number) => {
     setBookmarks((prev) => {
@@ -75,62 +83,101 @@ export function Surahs() {
 
   return (
     <div className="flex h-screen bg-black overflow-hidden">
-      <Menu
-        bookmarks={bookmarks}
-        onSelectBookmark={(b) => { handleSelectSura(b.sura); setActiveAyah(b.ayah); }}
-        settings={settings}
-        profile={profile}
-        onLogout={logout}
-        onNavigate={handleSelectSura}
-        onCollapse={setMenuCollapsed}
-      />
+      {/* Menu — на мобильном скрыт */}
+      <div className="hidden md:block">
+        <Menu
+          bookmarks={bookmarks}
+          onSelectBookmark={(b) => { handleSelectSura(b.sura); setActiveAyah(b.ayah); }}
+          settings={settings}
+          profile={profile}
+          onLogout={logout}
+          onNavigate={handleSelectSura}
+          onCollapse={setMenuCollapsed}
+        />
+      </div>
 
       <div
-        style={{ marginLeft: menuW }}
-        className="flex flex-col flex-1 h-screen transition-all duration-300 ease-in-out overflow-hidden"
+        style={{ marginLeft: 0 }}
+        className="flex flex-col flex-1 h-screen md:transition-all md:duration-300 md:ease-in-out overflow-hidden"
       >
-        <div className="shrink-0 h-16 z-30">
-          <Navbar
-            onSelectSura={handleSelectSura}
-            onSelectAyah={(sura, ayah) => { handleSelectSura(sura); handleSelectAyah(ayah); }}
-            langs={langs}
-            onChangeLangs={setLangs}
-            settings={settings}
-            onChangeSettings={handleChangeSettings}
-            profile={profile}
-            onSetName={setName}
-            onSetAvatar={setAvatar}
-          />
-        </div>
+        {/* На десктопе отступ от меню */}
+        <style>{`@media (min-width: 768px) { .desktop-margin { margin-left: ${menuW}px; } }`}</style>
 
-        <div className="flex flex-1 overflow-hidden">
-          <div className="shrink-0 w-64 h-full overflow-hidden border-r border-[#262626]/50">
-            <AyahList
-              activeSura={activeSura}
-              activeAyah={activeAyah}
+        <div className="desktop-margin flex flex-col flex-1 h-screen overflow-hidden">
+          <div className="shrink-0 h-16 z-30">
+            <Navbar
               onSelectSura={handleSelectSura}
-              onSelectAyah={handleSelectAyah}
-              settings={settings}
-            />
-          </div>
-
-          <div className="flex-1 overflow-y-auto">
-            <AyahContent
-              sura={activeSura}
-              activeAyah={activeAyah}
-              player={player}
-              bookmarks={bookmarks}
-              onToggleBookmark={toggleBookmark}
+              onSelectAyah={(sura, ayah) => { handleSelectSura(sura); handleSelectAyah(ayah); }}
               langs={langs}
+              onChangeLangs={setLangs}
               settings={settings}
+              onChangeSettings={handleChangeSettings}
+              profile={profile}
+              onSetName={setName}
+              onSetAvatar={setAvatar}
             />
           </div>
-        </div>
 
-        <div className="shrink-0 h-16 z-30">
-          <Player player={player} />
+          <div className="flex flex-1 overflow-hidden relative">
+
+            {/* AyahList — десктоп: сбоку, мобильный: drawer */}
+            {/* Мобильный overlay */}
+            {listOpen && (
+              <div
+                className="fixed inset-0 z-40 bg-black/60 md:hidden"
+                onClick={() => setListOpen(false)}
+              />
+            )}
+
+            {/* Drawer / sidebar */}
+            <div className={`
+              fixed inset-y-0 left-0 z-50 w-72 h-full transition-transform duration-300
+              md:relative md:inset-auto md:z-auto md:w-64 md:shrink-0 md:translate-x-0
+              md:border-r md:border-[#262626]/50
+              ${listOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+            `}>
+              {/* Кнопка закрыть на мобильном */}
+              <button
+                className="absolute top-3 right-3 z-10 md:hidden text-zinc-500 hover:text-white"
+                onClick={() => setListOpen(false)}
+              >
+                <X size={18} />
+              </button>
+              <AyahList
+                activeSura={activeSura}
+                activeAyah={activeAyah}
+                onSelectSura={handleSelectSuraMobile}
+                onSelectAyah={handleSelectAyah}
+                settings={settings}
+              />
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+              <AyahContent
+                sura={activeSura}
+                activeAyah={activeAyah}
+                player={player}
+                bookmarks={bookmarks}
+                onToggleBookmark={toggleBookmark}
+                langs={langs}
+                settings={settings}
+              />
+            </div>
+          </div>
+
+          <div className="shrink-0 h-16 z-30">
+            <Player player={player} />
+          </div>
         </div>
       </div>
+
+      {/* Кнопка открыть список — только мобильный */}
+      <button
+        className="fixed bottom-20 right-4 z-40 md:hidden w-12 h-12 rounded-full bg-[#F59E0B] text-black flex items-center justify-center shadow-lg"
+        onClick={() => setListOpen(true)}
+      >
+        <List size={20} />
+      </button>
     </div>
   );
 }

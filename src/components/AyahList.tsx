@@ -44,10 +44,10 @@ export function AyahList({ activeSura, activeAyah, onSelectSura, onSelectAyah, s
     });
   }, [activeSura]);
 
-  const handleSelectSura = (n: number) => {
-    onSelectSura(n);
-    setView("ayahs");
-  };
+ const handleSelectSura = (n: number) => {
+  onSelectSura(n);
+  setView("ayahs"); 
+};
 
   return (
     <div className="flex flex-col h-full bg-[#000000]">
@@ -68,19 +68,19 @@ export function AyahList({ activeSura, activeAyah, onSelectSura, onSelectAyah, s
           <button
             key={sura.number}
             onClick={() => handleSelectSura(sura.number)}
-            className={`ayah-item w-full flex items-center justify-between px-4 py-3 h-[80px]
-                        rounded-[8px] mx-0 transition-colors
+            className={`ayah-item w-full flex items-center justify-between px-4 py-3 min-h-[64px] h-auto
+                        rounded-[8px] mx-0 transition-colors active:opacity-70
                         ${activeSura === sura.number
                 ? "bg-yellow-500/10 text-yellow-500 border border-[#F59E0B33]"
                 : "text-zinc-400 hover:bg-zinc-800"
               }`}
           >
-            <span className="text-sm">{t.listSura} {sura.number}</span>
-            <div className="flex flex-col items-end gap-1">
+            <span className="text-sm shrink-0">{t.listSura} {sura.number}</span>
+            <div className="flex items-center gap-2 ml-2 min-w-0">
               {activeSura === sura.number && (
-                <img src="/right.svg" alt="" className="w-2.5" />
+                <img src="/right.svg" alt="" className="w-2.5 shrink-0" />
               )}
-              <span className="text-sm font-arabic">{sura.name_translate}</span>
+              <span className="text-sm font-arabic text-right leading-relaxed">{sura.name_translate}</span>
             </div>
           </button>
         ))}
@@ -89,19 +89,19 @@ export function AyahList({ activeSura, activeAyah, onSelectSura, onSelectAyah, s
           <button
             key={ayah.number}
             onClick={() => onSelectAyah(ayah.number)}
-            className={`ayah-item w-full flex items-center justify-between px-4 py-3 h-[80px]
-                        rounded-[8px] mx-0 transition-colors
+            className={`ayah-item w-full flex items-center justify-between px-4 py-3 min-h-[64px] h-auto
+                        rounded-[8px] mx-0 transition-colors active:opacity-70
                         ${activeAyah === ayah.number
                 ? "bg-yellow-500/10 text-yellow-500 border border-[#F59E0B33]"
                 : "text-zinc-400 hover:bg-zinc-800"
               }`}
           >
-            <span className="text-sm">{t.listAyah} {ayah.number}</span>
-            <div className="flex flex-col items-end gap-1">
+            <span className="text-sm shrink-0">{t.listAyah} {ayah.number}</span>
+            <div className="flex items-center gap-2 ml-2 min-w-0">
               {activeAyah === ayah.number && (
-                <img src="/right.svg" alt="" className="w-2.5" />
+                <img src="/right.svg" alt="" className="w-2.5 shrink-0" />
               )}
-              <span className="text-sm font-arabic">
+              <span className="text-sm font-arabic text-right leading-relaxed">
                 {ayah.text_ar.split(" ").slice(0, 2).join(" ")}
               </span>
             </div>
