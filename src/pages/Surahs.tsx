@@ -13,15 +13,12 @@ import { List, X } from "lucide-react";
 
 export type Bookmark = { sura: number; ayah: number };
 
-const MENU_W = { expanded: 255, collapsed: 76 };
-
 export function Surahs() {
   const [activeSura, setActiveSura] = useState(1);
   const [activeAyah, setActiveAyah] = useState(1);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [langs, setLangs] = useState({ ar: true, ru: true, du: true });
   const [settings, setSettings] = useState(loadSettings);
-  const [menuCollapsed, setMenuCollapsed] = useState(false);
   const [listOpen, setListOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false); // мобильный drawer меню
 
@@ -29,8 +26,6 @@ export function Surahs() {
   const player = usePlayer(settings.soundEnabled);
   const { profile, setName, setAvatar, logout } = useProfile();
   const { addRecent } = useRecents();
-
-  const menuW = menuCollapsed ? MENU_W.collapsed : MENU_W.expanded;
 
   useEffect(() => {
     const root = document.documentElement;
@@ -92,15 +87,12 @@ export function Surahs() {
         profile={profile}
         onLogout={logout}
         onNavigate={handleSelectSura}
-        onCollapse={setMenuCollapsed}
         mobileOpen={menuOpen}
         onMobileClose={() => setMenuOpen(false)}
       />
 
       <div className="flex flex-col flex-1 h-screen md:transition-all md:duration-300 md:ease-in-out overflow-hidden">
-        <style>{`@media (min-width: 768px) { .desktop-margin { margin-left: ${menuW}px; } }`}</style>
-
-        <div className="desktop-margin flex flex-col flex-1 h-screen overflow-hidden">
+        <div className="flex flex-col flex-1 h-screen overflow-hidden">
           <div className="shrink-0 h-16 z-30">
             <Navbar
               onSelectSura={handleSelectSura}

@@ -7,9 +7,8 @@ import { usePlayer } from "@/lib/useplayer";
 import { loadSettings, saveSettings, type AppSettings } from "@/lib/settings";
 import { useProfile } from "@/lib/useProfile";
 import { getDb, queryDb } from "@/lib/db";
+import { List, X } from "lucide-react";
 import type { Bookmark } from "./Surahs";
-
-const MENU_W = { expanded: 255, collapsed: 76 };
 
 interface JuzRow {
     juz: number;
@@ -29,15 +28,14 @@ export function Juz() {
     const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
     const [langs, setLangs] = useState({ ar: true, ru: true, du: true });
     const [settings, setSettings] = useState(loadSettings);
-    const [menuCollapsed, setMenuCollapsed] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [listOpen, setListOpen] = useState(true);
     const [juzList, setJuzList] = useState<(JuzRow & { name_ru: string; name_translate: string })[]>([]);
     const [view, setView] = useState<"juz" | "content">("juz");
 
     const handleChangeSettings = (s: AppSettings) => { setSettings(s); saveSettings(s); };
     const player = usePlayer(settings.soundEnabled);
     const { profile, setName, setAvatar, logout } = useProfile();
-
-    const menuW = menuCollapsed ? MENU_W.collapsed : MENU_W.expanded;
 
     useEffect(() => {
         const root = document.documentElement;
@@ -66,6 +64,7 @@ export function Juz() {
         setActiveSura(juz.sura);
         setActiveAyah(juz.ayah);
         setView("content");
+        setListOpen(false);
     };
 
     const toggleBookmark = (sura: number, ayah: number) => {
@@ -86,13 +85,11 @@ export function Juz() {
                 profile={profile}
                 onLogout={logout}
                 onNavigate={(n) => { setActiveSura(n); setActiveAyah(1); setView("content"); }}
-                onCollapse={setMenuCollapsed}
+                mobileOpen={menuOpen}
+                onMobileClose={() => setMenuOpen(false)}
             />
 
-            <div
-                style={{ marginLeft: menuW }}
-                className="flex flex-col flex-1 h-screen transition-all duration-300 ease-in-out overflow-hidden"
-            >
+            <div className="flex flex-col flex-1 h-screen transition-all duration-300 ease-in-out overflow-hidden">
                 <div className="shrink-0 h-16 z-30">
                     <Navbar
                         onSelectSura={(n) => { setActiveSura(n); setActiveAyah(1); setView("content"); }}
@@ -104,12 +101,32 @@ export function Juz() {
                         profile={profile}
                         onSetName={setName}
                         onSetAvatar={setAvatar}
+                        onOpenMenu={() => setMenuOpen(true)}
                     />
                 </div>
 
-                <div className="flex flex-1 overflow-hidden">
+                <div className="flex flex-1 overflow-hidden relative">
+                    {listOpen && (
+                        <div
+                            className="fixed inset-0 z-40 bg-black/60 md:hidden"
+                            onClick={() => setListOpen(false)}
+                        />
+                    )}
+
                     {/* Левая панель — список джузов */}
-                    <div className="shrink-0 w-64 h-full flex flex-col bg-black border-r border-[#262626]/50 overflow-hidden">
+                    <div className={`
+                        fixed inset-y-0 left-0 z-50 w-[85%] max-w-64 h-full bg-black transition-transform duration-300
+                        md:relative md:inset-auto md:z-auto md:w-64 md:max-w-none md:translate-x-0
+                        ${listOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+                    `}>
+                        <button
+                            className="absolute top-3 right-3 z-10 md:hidden text-zinc-500 hover:text-white"
+                            onClick={() => setListOpen(false)}
+                        >
+                            <X size={18} />
+                        </button>
+
+                        <div className="shrink-0 w-full h-full flex flex-col bg-black border-r border-[#262626]/50 overflow-hidden">
                         <div className="shrink-0 px-4 py-3 border-b border-[#262626]/50">
                             <p className="text-[#F59E0B] text-xs uppercase">Джузы</p>
                         </div>
@@ -132,6 +149,7 @@ export function Juz() {
                                     <span className="text-sm font-arabic">{j.name_translate}</span>
                                 </button>
                             ))}
+                        </div>
                         </div>
                     </div>
 
@@ -159,6 +177,13 @@ export function Juz() {
                     <Player player={player} />
                 </div>
             </div>
+
+            <button
+                className="fixed bottom-20 right-4 z-40 md:hidden w-12 h-12 rounded-full bg-[#F59E0B] text-black flex items-center justify-center shadow-lg"
+                onClick={() => setListOpen(true)}
+            >
+                <List size={20} />
+            </button>
         </div>
     );
 }

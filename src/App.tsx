@@ -20,7 +20,7 @@ function App() {
           <Route path="/help" element={<Help />} />
           <Route path="/names" element={<Names />} />
           <Route path="/prayertimes" element={<PrayerTimes />} />
-          <Route path="/About" element={<About />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </BrowserRouter>
     </>

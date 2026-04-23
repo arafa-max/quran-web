@@ -12,7 +12,9 @@
 }
 
 @custom-variant dark (&:is(.dark *));
-
+html, body {
+  overflow-x: hidden;
+}
 /* Размер шрифта */
 :root[data-fontsize="sm"] {
   --ayah-font-size: 14px;

@@ -6,16 +6,12 @@ import { usePlayer } from "@/lib/useplayer";
 import { loadSettings, saveSettings, type AppSettings } from "@/lib/settings";
 import { useProfile } from "@/lib/useProfile";
 
-const MENU_W = { expanded: 255, collapsed: 76 };
-
 export function Help() {
     const [settings, setSettings] = useState(loadSettings);
-    const [menuCollapsed, setMenuCollapsed] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
     const handleChangeSettings = (s: AppSettings) => { setSettings(s); saveSettings(s); };
     const player = usePlayer(settings.soundEnabled);
     const { profile, setName, setAvatar, logout } = useProfile();
-
-    const menuW = menuCollapsed ? MENU_W.collapsed : MENU_W.expanded;
 
     useEffect(() => {
         const root = document.documentElement;
@@ -35,13 +31,11 @@ export function Help() {
                 settings={settings}
                 profile={profile}
                 onLogout={logout}
-                onCollapse={setMenuCollapsed}
+                mobileOpen={menuOpen}
+                onMobileClose={() => setMenuOpen(false)}
             />
 
-            <div
-                style={{ marginLeft: menuW }}
-                className="flex flex-col flex-1 h-screen transition-all duration-300 ease-in-out overflow-hidden"
-            >
+            <div className="flex flex-col flex-1 h-screen transition-all duration-300 ease-in-out overflow-hidden">
                 <div className="shrink-0 h-16 z-30">
                     <Navbar
                         onSelectSura={() => { }}
@@ -53,6 +47,7 @@ export function Help() {
                         profile={profile}
                         onSetName={setName}
                         onSetAvatar={setAvatar}
+                        onOpenMenu={() => setMenuOpen(true)}
                     />
                 </div>
 
