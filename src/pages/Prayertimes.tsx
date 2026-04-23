@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { usePlayer } from "@/lib/useplayer";
 import { loadSettings, saveSettings, type AppSettings } from "@/lib/settings";
 import { useProfile } from "@/lib/useProfile";
+import { useT } from "@/lib/i18n";
 import { MapPin, Search } from "lucide-react";
 
 interface PrayerTime {
@@ -31,13 +32,13 @@ interface NominatimResult {
 }
 
 const PRAYER_KEYS = [
-  { key: "Fajr", nameRu: "Фаджр" },
-  { key: "Sunrise", nameRu: "Восход" },
-  { key: "Dhuhr", nameRu: "Зухр" },
-  { key: "Asr", nameRu: "Аср" },
-  { key: "Maghrib", nameRu: "Магриб" },
-  { key: "Isha", nameRu: "Иша" },
-];
+  { key: "Fajr", labelKey: "prayerFajr" },
+  { key: "Sunrise", labelKey: "prayerSunrise" },
+  { key: "Dhuhr", labelKey: "prayerDhuhr" },
+  { key: "Asr", labelKey: "prayerAsr" },
+  { key: "Maghrib", labelKey: "prayerMaghrib" },
+  { key: "Isha", labelKey: "prayerIsha" },
+] as const;
 
 export function PrayerTimes() {
   const [settings, setSettings] = useState(loadSettings);
@@ -62,6 +63,7 @@ export function PrayerTimes() {
   };
   const player = usePlayer(settings.soundEnabled);
   const { profile, setName, setAvatar, logout } = useProfile();
+  const t = useT(settings.interfaceLang);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -151,7 +153,7 @@ export function PrayerTimes() {
       setPrayers(
         PRAYER_KEYS.map((p) => ({
           name: p.key,
-          nameRu: p.nameRu,
+          nameRu: t[p.labelKey],
           time: timings[p.key]?.slice(0, 5) ?? "--:--",
         })),
       );
@@ -161,7 +163,7 @@ export function PrayerTimes() {
       setGregorianDate(json.data.date.readable);
       setCurrentCity(cityName ?? "");
     } catch {
-      setError("Не удалось загрузить время намазов");
+      setError(t.prayerTimesErrorLoad);
     } finally {
       setLoading(false);
     }
@@ -177,12 +179,12 @@ export function PrayerTimes() {
 
   const handleGeolocate = () => {
     if (!navigator.geolocation) {
-      setError("Геолокация не поддерживается");
+      setError(t.prayerTimesErrorGeoUnsupported);
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => fetchByCoords(pos.coords.latitude, pos.coords.longitude),
-      () => setError("Не удалось получить геолокацию"),
+      () => setError(t.prayerTimesErrorGeoDenied),
     );
   };
 
@@ -196,11 +198,11 @@ export function PrayerTimes() {
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityInput)}&format=json&limit=1`,
       );
       const geoData: NominatimResult[] = await geo.json();
-      if (!geoData.length) { setError("Город не найден"); setLoading(false); return; }
+      if (!geoData.length) { setError(t.prayerTimesErrorCityNotFound); setLoading(false); return; }
       const { lat, lon, display_name } = geoData[0];
       await fetchByCoords(parseFloat(lat), parseFloat(lon), display_name.split(",")[0]);
     } catch {
-      setError("Ошибка поиска города");
+      setError(t.prayerTimesErrorSearch);
       setLoading(false);
     }
   };
@@ -250,7 +252,7 @@ export function PrayerTimes() {
           <div className="max-w-lg mx-auto flex flex-col gap-6">
             {/* Заголовок */}
             <div>
-              <h1 className="text-white text-2xl font-bold">Время намазов</h1>
+              <h1 className="text-white text-2xl font-bold">{t.prayerTimesTitle}</h1>
               {currentCity && (
                 <p className="text-zinc-500 text-sm mt-1 flex items-center gap-1">
                   <MapPin size={12} /> {currentCity}
@@ -276,7 +278,7 @@ export function PrayerTimes() {
                       if (e.key === "Escape") setShowSuggestions(false);
                     }}
                     onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                    placeholder="Введите город..."
+                    placeholder={t.prayerTimesSearchPlaceholder}
                     className="w-full bg-[#171717] text-zinc-300 text-sm px-4 py-2.5 rounded-lg border border-[#262626]/50 outline-none placeholder-zinc-600 focus:border-yellow-500/40"
                   />
 
@@ -284,7 +286,7 @@ export function PrayerTimes() {
                   {showSuggestions && (suggestions.length > 0 || suggestLoading) && (
                     <div className="absolute top-full left-0 right-0 mt-1 bg-[#171717] border border-[#262626]/50 rounded-lg overflow-hidden z-50 shadow-xl">
                       {suggestLoading ? (
-                        <div className="px-4 py-3 text-zinc-600 text-sm">Поиск...</div>
+                        <div className="px-4 py-3 text-zinc-600 text-sm">{t.prayerTimesSearchLoading}</div>
                       ) : (
                         suggestions.map((s, i) => {
                           const parts = s.display_name.split(",");
@@ -322,7 +324,7 @@ export function PrayerTimes() {
                 className="flex items-center justify-center gap-2 w-full bg-[#171717] hover:bg-zinc-800 border border-[#262626]/50 text-zinc-400 text-sm px-4 py-2.5 rounded-lg transition-colors"
               >
                 <MapPin size={14} />
-                Определить по геолокации
+                {t.prayerTimesLocate}
               </button>
             </div>
 
@@ -361,7 +363,7 @@ export function PrayerTimes() {
                             {p.nameRu}
                           </p>
                           {isNext && (
-                            <p className="text-xs text-yellow-500/60 mt-0.5">Следующий намаз</p>
+                            <p className="text-xs text-yellow-500/60 mt-0.5">{t.prayerTimesNext}</p>
                           )}
                         </div>
                       </div>
@@ -379,9 +381,7 @@ export function PrayerTimes() {
               <div className="flex flex-col items-center justify-center py-16 gap-3">
                 <MapPin size={32} className="text-zinc-700" />
                 <p className="text-zinc-600 text-sm text-center">
-                  Введите город или разрешите
-                  <br />
-                  определение геолокации
+                  {t.prayerTimesEmpty}
                 </p>
               </div>
             )}

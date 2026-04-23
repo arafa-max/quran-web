@@ -6,6 +6,7 @@ import { usePlayer } from "@/lib/useplayer";
 import { loadSettings, saveSettings, type AppSettings } from "@/lib/settings";
 import { useProfile } from "@/lib/useProfile";
 import { getDb, queryDb } from "@/lib/db";
+import { useT } from "@/lib/i18n";
 import { List, X } from "lucide-react";
 
 interface NameRow {
@@ -31,6 +32,7 @@ export function Names() {
   };
   const player = usePlayer(settings.soundEnabled);
   const { profile, setName, setAvatar, logout } = useProfile();
+  const t = useT(settings.interfaceLang);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -109,13 +111,13 @@ export function Names() {
             <div className="shrink-0 w-full h-full flex flex-col bg-black border-r border-[#262626]/50 overflow-hidden">
               <div className="shrink-0 px-4 py-3 border-b border-[#262626]/50">
                 <p className="text-[#F59E0B] text-xs uppercase mb-2">
-                  99 имён Аллаха
+                  {t.namesTitle}
                 </p>
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Поиск..."
+                  placeholder={t.namesSearchPlaceholder}
                   className="w-full bg-[#171717] text-zinc-300 text-xs px-3 py-2 rounded-lg border border-[#262626]/50 outline-none placeholder-zinc-600 focus:border-yellow-500/40"
                 />
               </div>
@@ -170,7 +172,7 @@ export function Names() {
                     </p>
                   </div>
                   <span className="text-xs text-zinc-600 bg-[#171717] px-3 py-1 rounded-full border border-[#262626]/50">
-                    № {selected.number} из 99
+                    № {selected.number} {t.namesFrom}
                   </span>
                 </div>
 
@@ -178,7 +180,7 @@ export function Names() {
                 {selected.description && (
                   <div className="w-full max-w-xl bg-[#171717] rounded-xl px-6 py-5 border border-[#262626]/50">
                     <p className="text-[#F59E0B] text-xs uppercase mb-3">
-                      Описание
+                      {t.namesDescription}
                     </p>
                     <p className="text-zinc-300 text-sm leading-relaxed">
                       {selected.description}
@@ -190,7 +192,7 @@ export function Names() {
                 {selected.suras_names && (
                   <div className="w-full max-w-xl bg-[#171717] rounded-xl px-6 py-5 border border-[#262626]/50">
                     <p className="text-[#F59E0B] text-xs uppercase mb-3">
-                      Упоминается в сурах
+                      {t.namesMentionedIn}
                     </p>
                     <p className="text-zinc-300 text-sm">
                       {selected.suras_names}
@@ -200,7 +202,7 @@ export function Names() {
               </div>
             ) : (
               <div className="flex items-center justify-center h-full">
-                <p className="text-zinc-600 text-sm">Выберите имя из списка</p>
+                <p className="text-zinc-600 text-sm">{t.namesSelectPrompt}</p>
               </div>
             )}
           </div>

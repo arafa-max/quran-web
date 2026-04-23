@@ -171,9 +171,9 @@ export function Menu({
         BOOKMARKS: t.menuBookmarks,
         RECENTS: t.menuRecent,
         RECITERS: t.menuReciters,
-        NAMES: "99 имён",
-        PRAYERTIMES: "Время намазов",
-        ABOUT: "Об переводе",
+        NAMES: t.menuNames,
+        PRAYERTIMES: t.menuPrayerTimes,
+        ABOUT: t.menuAbout,
     };
 
     const sidebar = (

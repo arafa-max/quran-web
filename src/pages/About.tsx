@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { usePlayer } from "@/lib/useplayer";
 import { loadSettings, saveSettings, type AppSettings } from "@/lib/settings";
 import { useProfile } from "@/lib/useProfile";
+import { useT } from "@/lib/i18n";
 
 // Путь к PDF файлу — замените на реальный путь
 const PDF_PATH = "/about-translation.pdf";
@@ -19,6 +20,7 @@ export function About() {
   };
   const player = usePlayer(settings.soundEnabled);
   const { profile, setName, setAvatar, logout } = useProfile();
+  const t = useT(settings.interfaceLang);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -61,9 +63,9 @@ export function About() {
         <div className="flex flex-col flex-1 overflow-hidden">
           {/* Заголовок */}
           <div className="shrink-0 px-8 py-4 border-b border-[#262626]/50">
-            <h1 className="text-white text-xl font-bold">Об переводе</h1>
+            <h1 className="text-white text-xl font-bold">{t.aboutTitle}</h1>
             <p className="text-zinc-500 text-sm mt-0.5">
-              Информация о переводе Корана
+              {t.aboutSubtitle}
             </p>
           </div>
 
@@ -73,7 +75,7 @@ export function About() {
               src={`${PDF_PATH}#toolbar=0&navpanes=0&scrollbar=1`}
               className="w-full h-full"
               style={{ border: "none", background: "#000" }}
-              title="Об переводе"
+              title={t.aboutTitle}
             />
           </div>
         </div>

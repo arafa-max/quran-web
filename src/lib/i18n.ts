@@ -42,6 +42,9 @@ const translations = {
     menuAppSubtitle: "с переводом",
     menuCollapse: "Свернуть",
     menuExpand: "Развернуть",
+    menuNames: "99 имён",
+    menuPrayerTimes: "Время намазов",
+    menuAbout: "Об переводе",
 
     // AyahList
     listSuras: "Список сур",
@@ -56,6 +59,37 @@ const translations = {
     // Player
     playerQueue: "Очередь",
     playerReciter: "МИШАРИ РАШИД АЛАФАСИ",
+
+    // Names
+    namesTitle: "99 имён Аллаха",
+    namesSearchPlaceholder: "Поиск...",
+    namesFrom: "из 99",
+    namesDescription: "Описание",
+    namesMentionedIn: "Упоминается в сурах",
+    namesSelectPrompt: "Выберите имя из списка",
+
+    // PrayerTimes
+    prayerTimesTitle: "Время намазов",
+    prayerTimesSearchPlaceholder: "Введите город...",
+    prayerTimesSearchLoading: "Поиск...",
+    prayerTimesLocate: "Определить по геолокации",
+    prayerTimesNext: "Следующий намаз",
+    prayerTimesEmpty: "Введите город или разрешите определение геолокации",
+    prayerTimesErrorLoad: "Не удалось загрузить время намазов",
+    prayerTimesErrorGeoUnsupported: "Геолокация не поддерживается",
+    prayerTimesErrorGeoDenied: "Не удалось получить геолокацию",
+    prayerTimesErrorCityNotFound: "Город не найден",
+    prayerTimesErrorSearch: "Ошибка поиска города",
+    prayerFajr: "Фаджр",
+    prayerSunrise: "Восход",
+    prayerDhuhr: "Зухр",
+    prayerAsr: "Аср",
+    prayerMaghrib: "Магриб",
+    prayerIsha: "Иша",
+
+    // About
+    aboutTitle: "Об переводе",
+    aboutSubtitle: "Информация о переводе Корана",
   },
 
   en: {
@@ -99,6 +133,9 @@ const translations = {
     menuAppSubtitle: "with translation",
     menuCollapse: "Collapse",
     menuExpand: "Expand",
+    menuNames: "99 Names",
+    menuPrayerTimes: "Prayer Times",
+    menuAbout: "About Translation",
 
     // AyahList
     listSuras: "Surah list",
@@ -113,6 +150,37 @@ const translations = {
     // Player
     playerQueue: "Queue",
     playerReciter: "MISHARY RASHID ALAFASY",
+
+    // Names
+    namesTitle: "99 Names of Allah",
+    namesSearchPlaceholder: "Search...",
+    namesFrom: "of 99",
+    namesDescription: "Description",
+    namesMentionedIn: "Mentioned in surahs",
+    namesSelectPrompt: "Choose a name from the list",
+
+    // PrayerTimes
+    prayerTimesTitle: "Prayer Times",
+    prayerTimesSearchPlaceholder: "Enter a city...",
+    prayerTimesSearchLoading: "Searching...",
+    prayerTimesLocate: "Detect by geolocation",
+    prayerTimesNext: "Next prayer",
+    prayerTimesEmpty: "Enter a city or allow geolocation",
+    prayerTimesErrorLoad: "Failed to load prayer times",
+    prayerTimesErrorGeoUnsupported: "Geolocation is not supported",
+    prayerTimesErrorGeoDenied: "Failed to get geolocation",
+    prayerTimesErrorCityNotFound: "City not found",
+    prayerTimesErrorSearch: "City search error",
+    prayerFajr: "Fajr",
+    prayerSunrise: "Sunrise",
+    prayerDhuhr: "Dhuhr",
+    prayerAsr: "Asr",
+    prayerMaghrib: "Maghrib",
+    prayerIsha: "Isha",
+
+    // About
+    aboutTitle: "About Translation",
+    aboutSubtitle: "Information about the Quran translation",
   },
 
   du: {
@@ -156,6 +224,9 @@ const translations = {
     menuAppSubtitle: "тәржүмәси билән",
     menuCollapse: "Жыйу",
     menuExpand: "Ачу",
+    menuNames: "99 исим",
+    menuPrayerTimes: "Намаз вақти",
+    menuAbout: "Тәржүмә һәққидә",
 
     // AyahList
     listSuras: "Сурәләр тизими",
@@ -170,6 +241,37 @@ const translations = {
     // Player
     playerQueue: "Навбат",
     playerReciter: "МИШАРИ РАШИД АЛАФАСИ",
+
+    // Names
+    namesTitle: "Алланиң 99 исми",
+    namesSearchPlaceholder: "Издәш...",
+    namesFrom: "99 дин",
+    namesDescription: "Тәсвир",
+    namesMentionedIn: "Сүрәләрдә өтүлиду",
+    namesSelectPrompt: "Тизимдин исим таллаң",
+
+    // PrayerTimes
+    prayerTimesTitle: "Намаз вақти",
+    prayerTimesSearchPlaceholder: "Шәһәр киргүзүң...",
+    prayerTimesSearchLoading: "Излиниватиду...",
+    prayerTimesLocate: "Геолокация билән тепиш",
+    prayerTimesNext: "Кейинки намаз",
+    prayerTimesEmpty: "Шәһәр киргүзүң яки геолокациягә рухсәт бериң",
+    prayerTimesErrorLoad: "Намаз вақтини жүкләп болмиди",
+    prayerTimesErrorGeoUnsupported: "Геолокация қолланмайду",
+    prayerTimesErrorGeoDenied: "Геолокацияни елиш болмиди",
+    prayerTimesErrorCityNotFound: "Шәһәр тепилмиди",
+    prayerTimesErrorSearch: "Шәһәр издәш хатаси",
+    prayerFajr: "Фәҗр",
+    prayerSunrise: "Күн чиқиш",
+    prayerDhuhr: "Зуһр",
+    prayerAsr: "Әср",
+    prayerMaghrib: "Мәғриб",
+    prayerIsha: "Хуптан",
+
+    // About
+    aboutTitle: "Тәржүмә һәққидә",
+    aboutSubtitle: "Қуран тәржүмиси һәққидә учур",
   },
 } as const;
 
