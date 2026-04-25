@@ -318,8 +318,12 @@ export function Menu({
 
     return (
         <>
-            {/* Десктоп: фиксированный сайдбар */}
-            <div className="hidden md:block fixed left-0 top-0 h-screen z-40 shrink-0">
+            {/* Десктоп: сайдбар участвует в layout и не перекрывает контент */}
+            <div
+                className={`hidden md:block h-screen z-40 shrink-0 transition-all duration-300 ease-in-out ${
+                    collapsed ? "w-[88px]" : "w-[280px]"
+                }`}
+            >
                 {sidebar}
             </div>
 

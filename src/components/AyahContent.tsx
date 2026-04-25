@@ -94,108 +94,113 @@ export function AyahContent({ sura, activeAyah, player, bookmarks, onToggleBookm
 
   return (
     // ✅ Никаких margin/padding снаружи — родитель в Surahs.tsx управляет размером
-    <div className="min-h-full bg-black pb-6">
-      {/* Шапка суры */}
-      <div className="ayah-card mx-5 mt-5 rounded-[12px] bg-[#78350F]/20
-                      flex items-center justify-between px-6 py-5">
-        <div>
-          <div className="flex">
-            <p className="text-[#F59E0B] text-xs mb-1 bg-[#F59E0B33] rounded-4xl p-1 px-3">
-              {t.surahLabel} {String(sura).padStart(3, "0")}
-            </p>
+    <div className="min-h-full bg-black">
+      <div className="mx-auto w-full max-w-[1120px] px-4 pb-6 md:px-6 xl:px-8">
+        {/* Шапка суры */}
+        <div className="ayah-card mt-5 rounded-[12px] bg-[#78350F]/20
+                        flex items-center justify-between gap-6 px-5 py-5 md:px-6">
+          <div>
+            <div className="flex">
+              <p className="text-[#F59E0B] text-xs mb-1 bg-[#F59E0B33] rounded-4xl p-1 px-3">
+                {t.surahLabel} {String(sura).padStart(3, "0")}
+              </p>
+            </div>
+            <h1 className="text-white text-2xl font-bold">{suraInfo?.name_ru ?? "..."}</h1>
           </div>
-          <h1 className="text-white text-2xl font-bold">{suraInfo?.name_ru ?? "..."}</h1>
+          <p className="text-[#F59E0B] text-3xl md:text-5xl font-arabic text-right">
+            {suraInfo?.name_translate}
+          </p>
         </div>
-        <p className="text-[#F59E0B] text-5xl font-arabic">{suraInfo?.name_translate}</p>
-      </div>
 
-      {/* Аяты */}
-      {ayahs.map((ayah) => {
-        const remoteUrl = REMOTE_AUDIO_URL(sura, ayah.number, settings.reciterId);
-        const isThisPlaying =
-          player.playing &&
-          (player.track?.src === remoteUrl ||
-            player.track?.title === `${t.listAyah} ${ayah.number}`);
-        const isBookmarked = bookmarks.some((b) => b.sura === sura && b.ayah === ayah.number);
+        {/* Аяты */}
+        {ayahs.map((ayah) => {
+          const remoteUrl = REMOTE_AUDIO_URL(sura, ayah.number, settings.reciterId);
+          const isThisPlaying =
+            player.playing &&
+            (player.track?.src === remoteUrl ||
+              player.track?.title === `${t.listAyah} ${ayah.number}`);
+          const isBookmarked = bookmarks.some((b) => b.sura === sura && b.ayah === ayah.number);
 
-        return (
-          <div
-            key={ayah.number}
-            ref={(el) => { ayahRefs.current[ayah.number] = el; }}
-            className={`ayah-card mx-5 rounded-[12px] transition-colors my-5 px-6 py-5
-                        ${activeAyah === ayah.number
-                ? "bg-[#78350F]/20 ring-1 ring-[#F59E0B]/30"
-                : "bg-[#171717]/30"
-              }`}
-          >
-            <div className="flex flex-row mb-8">
-              <div className="flex flex-col items-center gap-7">
-                <div className="w-10 h-10 rounded-full border-[#F59E0B4D] bg-[#F59E0B0D]
-                                border-2 flex items-center justify-center">
-                  <span className="text-[#F59E0B] text-xs font-bold">{ayah.number}</span>
+          return (
+            <div
+              key={ayah.number}
+              ref={(el) => { ayahRefs.current[ayah.number] = el; }}
+              className={`ayah-card rounded-[12px] transition-colors my-5 px-5 py-5 md:px-6
+                          ${activeAyah === ayah.number
+                  ? "bg-[#78350F]/20 ring-1 ring-[#F59E0B]/30"
+                  : "bg-[#171717]/30"
+                }`}
+            >
+              <div className="flex flex-row mb-8 gap-4">
+                <div className="flex flex-col items-center gap-7 shrink-0">
+                  <div className="w-10 h-10 rounded-full border-[#F59E0B4D] bg-[#F59E0B0D]
+                                  border-2 flex items-center justify-center">
+                    <span className="text-[#F59E0B] text-xs font-bold">{ayah.number}</span>
+                  </div>
+                  <button
+                    onClick={() => isThisPlaying ? player.togglePlay() : handlePlay(ayah)}
+                    className={`flex items-center justify-center w-5 h-5 rounded-full text-xs
+                                transition-colors
+                                ${isThisPlaying
+                        ? "bg-[#F59E0B] text-black"
+                        : "bg-[#737373] hover:bg-[#F59E0B] hover:text-black text-white"
+                      }`}
+                  >
+                    {isThisPlaying ? "⏸" : "▶"}
+                  </button>
+                  <button
+                    onClick={() => onToggleBookmark(sura, ayah.number)}
+                    className={`text-xs transition-colors
+                                ${isBookmarked ? "text-yellow-500" : "text-zinc-600 hover:text-white"}`}
+                  >
+                    <Bookmark size={16} fill={isBookmarked ? "currentColor" : "none"} />
+                  </button>
                 </div>
-                <button
-                  onClick={() => isThisPlaying ? player.togglePlay() : handlePlay(ayah)}
-                  className={`flex items-center justify-center w-5 h-5 rounded-full text-xs
-                              transition-colors
-                              ${isThisPlaying
-                      ? "bg-[#F59E0B] text-black"
-                      : "bg-[#737373] hover:bg-[#F59E0B] hover:text-black text-white"
-                    }`}
-                >
-                  {isThisPlaying ? "⏸" : "▶"}
-                </button>
-                <button
-                  onClick={() => onToggleBookmark(sura, ayah.number)}
-                  className={`text-xs transition-colors
-                              ${isBookmarked ? "text-yellow-500" : "text-zinc-600 hover:text-white"}`}
-                >
-                  <Bookmark size={16} fill={isBookmarked ? "currentColor" : "none"} />
-                </button>
+
+                {langs.ar && (
+                  <p
+                    className="flex-1 text-white font-arabic text-right leading-loose mb-6 dir-rtl"
+                    style={{ fontSize: "calc(var(--ayah-font-size) * 3)" }}
+                  >
+                    {ayah.text_ar}
+                  </p>
+                )}
               </div>
 
-              {langs.ar && (
-                <p
-                  className="flex-1 text-white font-arabic text-right leading-loose mb-6 dir-rtl"
-                  style={{ fontSize: "calc(var(--ayah-font-size) * 3)" }}
-                >
-                  {ayah.text_ar}
-                </p>
-              )}
+              <div
+                className={`grid gap-6 pt-4 border-t border-[#262626]/50 ${
+                  langs.ru && langs.du ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"
+                }`}
+              >
+                {langs.ru && (
+                  <div>
+                    <p className="text-[#F59E0B] text-xs mb-2 flex items-center gap-2">
+                      <span className="inline-block w-[7px] h-[8px] rounded-full bg-[#F59E0B66]" />
+                      {t.translationRu}
+                    </p>
+                    <p className="text-zinc-400 leading-relaxed"
+                      style={{ fontSize: "var(--ayah-font-size)" }}>
+                      {ayah.text_ru}
+                    </p>
+                  </div>
+                )}
+                {langs.du && (
+                  <div>
+                    <p className="text-[#F59E0B] text-xs mb-2 flex items-center gap-2">
+                      <span className="inline-block w-[8px] h-[8px] rounded-full bg-[#3B82F666]" />
+                      {t.translationDu}
+                    </p>
+                    <p className="text-zinc-400 leading-relaxed"
+                      style={{ fontSize: "var(--ayah-font-size)" }}>
+                      {ayah.text_du}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
-
-            <div
-              className={`grid gap-6 pt-4 border-t border-[#262626]/50
-                          ${langs.ru && langs.du ? "grid-cols-2" : "grid-cols-1"}`}
-            >
-              {langs.ru && (
-                <div>
-                  <p className="text-[#F59E0B] text-xs mb-2 flex items-center gap-2">
-                    <span className="inline-block w-[7px] h-[8px] rounded-full bg-[#F59E0B66]" />
-                    {t.translationRu}
-                  </p>
-                  <p className="text-zinc-400 leading-relaxed"
-                    style={{ fontSize: "var(--ayah-font-size)" }}>
-                    {ayah.text_ru}
-                  </p>
-                </div>
-              )}
-              {langs.du && (
-                <div>
-                  <p className="text-[#F59E0B] text-xs mb-2 flex items-center gap-2">
-                    <span className="inline-block w-[8px] h-[8px] rounded-full bg-[#3B82F666]" />
-                    {t.translationDu}
-                  </p>
-                  <p className="text-zinc-400 leading-relaxed"
-                    style={{ fontSize: "var(--ayah-font-size)" }}>
-                    {ayah.text_du}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
